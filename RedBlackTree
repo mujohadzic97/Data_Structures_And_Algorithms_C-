@@ -1,6 +1,4 @@
 #include <iostream>
-
-
 template<typename E>
 class RBStablo{
     struct Cvor{
@@ -23,7 +21,7 @@ class RBStablo{
         RB_Insert(T,novi);
     }
     void Left_Rotate(RBStablo* T,Cvor* x){
-        Cvor* y = x->r;
+       Cvor* y = x->r;
         x->r = y->l;
         if(y->l!=T->nill)
             y->l->par=x;
@@ -136,12 +134,127 @@ printRBSInorder(prolaz->l);
         printRBSInorder(prolaz->r);
         
     }
+    void RB_Transplant(RBStablo* T, Cvor* u, Cvor*v){
+        if(u->par == T->nill)
+            T->korijen = v;
+        else if(u == u->par->l)
+            u->par->l=v;
+        else
+            u->par->r = v;
+        v->par=u->par;
+    }
+    void RB_Delete(RBStablo* T, Cvor* z){
+        Cvor* y=z;
+        Cvor* x;
+        char yoc = y->boja;
+        if(z->l == T->nill){
+            x = z->r;
+            RB_Transplant(T,z,z->r);
+        }else if(z->r == T->nill){
+            x = z->l;
+            RB_Transplant(T,z,z->l);
+        }else{
+            y = TREE_MIN(z->r);
+            yoc = y->boja;
+            x = y->r;
+            if(y->par==z){
+                x->par = y;
+            }else{
+                RB_Transplant(T,y,y->r);
+                y->r = z->r;
+                y->r->par = y;
+            }
+            RB_Transplant(T,z,y);
+            
+            y->l = z->l;
+            y->l->par = y;
+            y->boja = z->boja;
+        }
+        if(yoc =='B')
+            RB_Delete_Fixup(T,x);
+    }
+    void RB_Delete_Fixup(RBStablo* T,Cvor* x){
+        while(x!=T->korijen && x->boja=='B'){
+            Cvor* w;
+            if(x==x->par->l){
+                w = x->par->r;
+                if(w->boja=='R'){
+                    w->boja = 'C';
+                    x->par->boja = 'R';
+                    Left_Rotate(T,x->par);
+                    w = x->par->r;
+                }
+                if(w->l->boja=='B' && w->r->boja=='B'){
+                    w->boja='R';
+                    x=x->par;
+                }else{
+                    
+                    if(w->r->boja =='B'){
+                        w->l->boja = 'B';
+                        w->boja = 'R';
+                        Right_Rotate(T,w);
+                        w = x->par->r;
+                    }
+                    w->boja=x->par->boja;
+                    x->par->boja = 'B';
+                    w->r->boja = 'B';
+                    Left_Rotate(T,x->par);
+                    x=T->korijen;
+                }
+            }else{
+                w = x->par->l;
+                if(w->boja=='R'){
+                    w->boja = 'C';
+                    x->par->boja = 'R';
+                    Left_Rotate(T,x->par);
+                    w = x->par->r;
+                }
+                if(w->r->boja=='B' && w->l->boja=='B'){
+                    w->boja='R';
+                    x=x->par;
+                }else{
+                    
+                    if(w->l->boja =='B'){
+                        w->r->boja = 'B';
+                        w->boja = 'R';
+                        Right_Rotate(T,w);
+                        w = x->par->l;
+                    }
+                    w->boja=x->par->boja;
+                    x->par->boja = 'B';
+                    w->l->boja = 'B';
+                    Left_Rotate(T,x->par);
+                    x=T->korijen;
+                }
+            }
+        }
+        x->boja ='B';
+    }
+    Cvor* TREE_MIN(Cvor* m){
+        Cvor* prolaz =m;
+        
+        
+        while(prolaz->l!=nill){
+            prolaz=prolaz->l;
+        }
+        return prolaz;
+    }
+    void obrisi(E key, RBStablo* T){
+        Cvor* brisem=korijen;
+        while(key!=brisem->key){
+            if(key>brisem->key){
+                brisem = brisem->r;
+            }else{
+                brisem = brisem->l;
+            }
+        }
+        RB_Delete(T,brisem);
+    }
 };
 
 int main() {
     RBStablo<int> T =RBStablo<int>();
-    /*
-    T.dodaj(6,&T);
+    /*T.dodaj(6,&T);
     T.dodaj(11,&T);
     T.dodaj(10,&T);
     T.dodaj(2,&T);
@@ -154,14 +267,14 @@ int main() {
     T.dodaj(36,&T);
     T.dodaj(12,&T);
     T.dodaj(31,&T);
-    
     T.ispisi();
-    std::cout << "Završio prvo umetanje" << std::endl;*/
+
+    T.ispisi();*/
     int opcija;
     int broj;
     do {
         std::cout<<"\nIzaberite opciju"<<std::endl;
-        std::cout<<"1.Umetanje cvora\n2.Inorder ispis cvorova\n3.Izlaz"<<std::endl;
+        std::cout<<"1.Umetanje cvora\n2.Inorder ispis cvorova\n3.Brisanje Cvora\n4.Izlaz"<<std::endl;
         std::cin>>opcija;  
         if(opcija==1) {
             std::cout<<"Upišite element koji želite dodati: ";
@@ -170,7 +283,11 @@ int main() {
         }
         else if(opcija==2){
             T.ispisi();
+        }else if(opcija==3){
+            std::cout<<"Upišite element koji želite obrisati: ";
+            std::cin>>broj;
+            T.obrisi(broj,&T);
         }
-    } while (opcija!=3);
+    } while (opcija!=4);
     return 0;
 }
