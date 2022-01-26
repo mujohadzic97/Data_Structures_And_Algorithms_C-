@@ -1,0 +1,176 @@
+#include <iostream>
+
+
+template<typename E>
+class RBStablo{
+    struct Cvor{
+        Cvor* l;
+        Cvor* r;
+        Cvor* par;
+        E key;
+        char boja;
+        Cvor(E key,Cvor* l=0,Cvor* r=0,Cvor* par=0,char bo='R') :key(key),l(l),r(r),par(par),boja(bo){}
+    };
+    Cvor* korijen;
+    Cvor* nill;
+    public:
+    RBStablo(){
+        nill = new Cvor(0,0,0,0,'B');
+        korijen = nill;
+    }
+    void dodaj(E key,RBStablo* T){
+        Cvor* novi = new Cvor(key,T->nill,T->nill,T->nill,'B');
+        RB_Insert(T,novi);
+    }
+    void Left_Rotate(RBStablo* T,Cvor* x){
+        Cvor* y = x->r;
+        x->r = y->l;
+        if(y->l!=T->nill)
+            y->l->par=x;
+        y->par = x->par;
+        if(x->par == T->nill)
+            T->korijen = y;
+        else if(x == x->par->l)
+            x->par->l = y;
+        else
+            x->par->r=y;
+        y->l = x;
+        x->par = y;
+    }
+    void RB_Insert(RBStablo* T, Cvor* z){
+        Cvor* y = T->nill;
+        Cvor* x = T->korijen;
+        while(x!=T->nill){
+            y = x;
+            if(z->key < x->key)
+                x=x->l;
+            else
+                x=x->r;
+        }
+        z->par=y;
+        if(y== T->nill){
+            T->korijen = z;
+        }
+        else if(z->key < y->key)
+            y->l = z;
+        else 
+            y->r = z;
+        z->l = T->nill;
+        z->r = T->nill;
+        z->boja = 'R';
+        if(z==korijen) {
+            z->boja='B';
+            z->par = T->nill;
+        }
+        if(z->par !=T->nill)
+        RB_Insert_Fixup(T,z);
+            
+    }
+    void Right_Rotate(RBStablo* T,Cvor* x){
+        Cvor* y = x->l;
+        x->l = y->r;
+        if(y->r!=T->nill)
+            y->r->par=x;
+        y->par = x->par;
+        if(x->par == T->nill)
+            T->korijen = y;
+        else if(x == x->par->l)
+            x->par->l = y;
+        else
+            x->par->r=y;
+        y->r = x;
+        x->par = y;
+    }
+    void RB_Insert_Fixup(RBStablo* T,Cvor* z){
+        while(z->par->boja =='R' && korijen!=z){
+            if(z->par == z->par->par->l){
+                Cvor* y= z->par->par->r;
+                if(y->boja=='R'){
+                    z->par->boja='B';
+                    y->boja='B';
+                    z->par->par->boja='R';
+                    z=z->par->par;
+                }else{
+                    
+                 if(z == z->par->r){
+                    z=z->par;
+                    Left_Rotate(T,z);
+                }
+                    z->par->boja ='B';
+                    z->par->par->boja ='R';
+                    Right_Rotate(T,z->par->par);
+                }
+            }else{ 
+                Cvor* y= z->par->par->l;
+                if(y->boja=='R'){
+                    z->par->boja='B';
+                    y->boja='B';
+                    z->par->par->boja='R';
+                    z=z->par->par;
+                
+                }else{
+                    
+                if(z == z->par->l){
+                    z=z->par;
+                    Right_Rotate(T,z);
+                }
+                    z->par->boja ='B';
+                    z->par->par->boja ='R';
+                    Left_Rotate(T,z->par->par);
+                }
+            }
+        }
+    
+        T->korijen->boja = 'B';
+        
+    }
+    void ispisi(){
+        printRBSInorder(korijen);
+    }
+    void printRBSInorder(Cvor* prolaz){
+        if(prolaz == nill){
+            return;
+        }
+printRBSInorder(prolaz->l);
+        std::cout << prolaz->key<< " "<<prolaz->boja<<" ";
+        printRBSInorder(prolaz->r);
+        
+    }
+};
+
+int main() {
+    RBStablo<int> T =RBStablo<int>();
+    /*
+    T.dodaj(6,&T);
+    T.dodaj(11,&T);
+    T.dodaj(10,&T);
+    T.dodaj(2,&T);
+    T.dodaj(9,&T);
+    T.dodaj(7,&T);
+    T.dodaj(5,&T);
+    T.dodaj(13,&T);
+    T.dodaj(22,&T);
+    T.dodaj(27,&T);
+    T.dodaj(36,&T);
+    T.dodaj(12,&T);
+    T.dodaj(31,&T);
+    
+    T.ispisi();
+    std::cout << "Završio prvo umetanje" << std::endl;*/
+    int opcija;
+    int broj;
+    do {
+        std::cout<<"\nIzaberite opciju"<<std::endl;
+        std::cout<<"1.Umetanje cvora\n2.Inorder ispis cvorova\n3.Izlaz"<<std::endl;
+        std::cin>>opcija;  
+        if(opcija==1) {
+            std::cout<<"Upišite element koji želite dodati: ";
+            std::cin>>broj;
+            T.dodaj(broj, &T);
+        }
+        else if(opcija==2){
+            T.ispisi();
+        }
+    } while (opcija!=3);
+    return 0;
+}
