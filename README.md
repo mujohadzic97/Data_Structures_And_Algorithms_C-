@@ -1,1 +1,1 @@
-Data Structurs in C++
+Data Structures in C++
